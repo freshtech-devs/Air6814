@@ -17,21 +17,9 @@ SHT30 can be called at the same time as MiCS6814 but due to the nature of how Mi
 |SHT30|Temperature(°C), Relative Humidity(RH%)| **0x44**|
 
 ## Installation of the library
-This library can be installed using the Arduino Library manager:
-Start the [Arduino IDE](http://www.arduino.cc/en/main/software) and open
-the Library Manager via
-
-`Sketch` ➔ `Include Library` ➔ `Manage Libraries...`
-
-Search for the `Air6814` library in the `Filter
-your search...` field and install it by clicking the `install` button.
-
-If you cannot find it in the library manager, download the latest release as .zip file
-and add it to your [Arduino IDE](http://www.arduino.cc/en/main/software) via
-
-`Sketch` ➔ `Include Library` ➔ `Add .ZIP Library...`
-
-This library is also published on PlatformIO library manager. You can use your PlatformIO IDE to search for this library.
+This library can be installed using the PlatformIO Library manager:
+Search `Air6814` in PlatformIO then add to your desired project,
+or simply add `lib_deps = pisache/Air6814@^1.0.0` at the end of your `platformio.ini`
 
 ## Connect the sensor
 Use the following pin description to connect your Air6814 to the standard I2C bus:
