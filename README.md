@@ -1,6 +1,6 @@
-# Freshtech Air6814 Sensor Module Arduino Library
+# Freshtech Air6814 Sensor Module Library
 
-This is the Freshtech Air6814 library for Arduino allowing you to communicate with Air6814 over I2C.
+This is the Freshtech Air6814 library allowing you to communicate with Air6814 over I2C.
 
 <img src="images/Air6814.png">
 
