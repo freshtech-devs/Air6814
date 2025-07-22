@@ -1,0 +1,23 @@
+{
+    "name": "Air6814",
+    "version": "1.0.0",
+    "description": "Arduino/PlatformIO driver for the Freshtechc Air6814 sensor module.",
+    "keywords": ["gas", "sensor", "MICS6814", "CO", "NO2", "NH3", "CH4", "air quality", "SHT30", "Temperature", "Humidity"],
+    "authors": [
+        {
+        "name": "HoJun Lee",
+        "email": "hobulhojunlee20@gmail.com",
+        "url": "https://pisache.github.io/",
+        "maintainer": true
+        }
+    ],
+    "license": "MIT",
+    "homepage": "https://www.freshtech.kr/",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/freshtech-devs/Air6814.git"
+    },
+    "frameworks": "*",
+    "platforms": "*",
+    "headers": "Air6814.h"
+}
