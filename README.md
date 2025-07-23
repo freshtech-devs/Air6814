@@ -16,6 +16,21 @@ SHT30 can be called at the same time as MiCS6814 but due to the nature of how Mi
 |MiCS6814 (Through ADC)|NH3, CO, CH4, NO2| **0x48**|
 |SHT30|Temperature(°C), Relative Humidity(RH%)| **0x44**|
 
+## Sensor Calibration
+Freshtech Air6814 is calibrated with following baseline Resistance:
+| MOD Type | Baseline Ω | Expected Output in ppm |
+|----------|------------|------------------------|
+| NH3      | 99591.49   | NH3: 0.03              |
+| RED      | 99768.25   | CO: 4.0, CH4: 1.8      |
+| OX       | 12361.46   | NO2: 0.0049            | 
+
+This calibration was done in clean air at Jeju, South Korea
+If you feel such calibration does not fit your environment, you can re-calibrate your sensor by:
+1. Pre-heating the sensor for at least 24 hours (48 hours is recommended)
+2. Take multiple resistance readings using `printOhm()` method at clean air
+3. Average out the data and calibrate it to acutal respective gas concentration
+4. Use the resistance value for new baseline using `setBaseline()` method. 
+
 ## Installation of the library
 This library can be installed using the PlatformIO Library manager:
 Search `Air6814` in PlatformIO then add to your desired project,
