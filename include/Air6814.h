@@ -48,17 +48,12 @@ class Air6814
       nh3 = 0.0; co = 0.0; ch4 = 0.0; no2 = 0.0;
     }
 
-    ~Air6814()
-    { }
+    ~Air6814() {}
 
-    /// @brief Initialise ads1115 for MiCS6814
-    /// @param channel Different channel of MOD. 0: NH3, 1: RED, 2: OX
-    void ads1115_config(uint8_t channel);
-
-    /// @brief Initialise SHT30 I2C sensor with 0x44 address
-    /// @return true : SHT30 initialisation was successful
-    /// @return false : SHT30 Initialisation failed
-    bool sht30_start();
+    /// @brief begin the sensor object
+    /// @return true : sensor initialisation was successful
+    /// @return false : sensor initialisation failed 
+    bool begin();
 
     /// @brief Reads all data possible from Air6814 sensor object
     /// @param option ALL : All gas + temperature & humidity
@@ -70,10 +65,16 @@ class Air6814
     /// @param option TH : Only temperature & humidity
     const void printData(int option);
 
+    /// @brief print the current resistance measurement from MiCS6814
+    const void printOhm();
+
+    /// @brief Set the baseline resistance for MiCS6814
+    void setBaseline(float NH3, float RED, float OX);
+
   private:
-    const float R0_NH3 = 226311.81;
-    const float R0_RED  = 283656.06;
-    const float R0_OX = 12361.46;
+    float R0_NH3 = 99591.49;
+    float R0_RED  = 99768.25;
+    float R0_OX = 12361.46;
 
     int shtOnly;
 
@@ -83,6 +84,17 @@ class Air6814
     float co;
     float ch4;
     float no2;
+
+    /// @brief Initialise ads1115 for MiCS6814
+    /// @param channel Different channel of MOD. 0: NH3, 1: RED, 2: OX
+    /// @return true : MiCS6814 initialisation was successful
+    /// @return false : MiCS6814 initialisation failed 
+    bool ads1115_config(uint8_t channel);
+
+    /// @brief Initialise SHT30 I2C sensor with 0x44 address
+    /// @return true : SHT30 initialisation was successful
+    /// @return false : SHT30 Initialisation failed
+    bool sht30_start();
 
     /// @brief Read raw sensor readings from MOD of MiCS6814. Call adds1115_config() before to change the target MOD.
     /// @return Raw sensor readings from MOD

@@ -25,7 +25,7 @@
 
 #include "Air6814.h"
 
-void Air6814::ads1115_config(uint8_t channel)
+bool Air6814::ads1115_config(uint8_t channel)
 {
   uint16_t config = 0x8000;
   config |= (0x01 + channel) << 12;
@@ -37,8 +37,38 @@ void Air6814::ads1115_config(uint8_t channel)
   Wire.write(0x01);
   Wire.write(config >> 8);
   Wire.write(config & 0xFF);
-  Wire.endTransmission();
+  uint8_t res = Wire.endTransmission() == 0;
   delay(10);
+  return res;
+}
+
+bool Air6814::sht30_start()
+{
+  Wire.beginTransmission(0x44);
+  Wire.write(0x2C);
+  Wire.write(0x06);
+  uint8_t res = Wire.endTransmission() == 0;
+  delay(10);
+  return res; 
+}
+
+bool Air6814::begin()
+{
+  if (this->shtOnly == 0)
+  {
+    if (!this->ads1115_config(0))
+    {
+      Serial.println("MiCS6814 INIT Failed");
+      return false;
+    }
+  }
+  if (!this->sht30_start())
+  {
+    Serial.println("SHT30 INIT Failed");
+    return false;
+  }
+
+  return true;
 }
 
 int16_t Air6814::ads1115_read()
@@ -71,21 +101,13 @@ void Air6814::rawToPPM(float nh3_raw, float red_raw, float ox_raw)
   float red_rs = RL * ((5.0 - red_v) / red_v);
   float ox_rs  = RL * ((5.0 - ox_v ) / ox_v );
 
-  this->nh3 = computePPM(nh3_rs, R0_NH3, -0.48, -0.904705);
-  this->co  = computePPM(red_rs, R0_RED, -0.77, -0.41);
-  this->ch4 = computePPM(red_rs, R0_RED, -0.40, -0.274891);
+  this->nh3 = computePPM(nh3_rs, R0_NH3, -0.48, -0.7309817977);
+  this->co  = computePPM(red_rs, R0_RED, -0.77, 0.4635861933);
+  this->ch4 = computePPM(red_rs, R0_RED, -0.40, 0.122109002);
   this->no2 = computePPM(ox_rs,  R0_OX,  -1.20, -2.772829);
 }
 
-bool Air6814::sht30_start()
-{
-  Wire.beginTransmission(0x44);
-  Wire.write(0x2C);
-  Wire.write(0x06);
-  uint8_t res = Wire.endTransmission() == 0;
-  delay(10);
-  return res; 
-}
+
 
 bool Air6814::sht30_read()
 {
@@ -149,4 +171,36 @@ const void Air6814::printData(int option)
     delay(10);
     Serial.println();
   }
+}
+
+const void Air6814::printOhm()
+{
+  ads1115_config(0); delay(100);
+  int16_t nh3 = ads1115_read();
+  ads1115_config(1); delay(100);
+  int16_t red = ads1115_read();
+  ads1115_config(2); delay(100); 
+  int16_t ox = ads1115_read();
+
+  float nh3_v = ads1115_toVoltage(nh3);
+  float red_v = ads1115_toVoltage(red);
+  float ox_v  = ads1115_toVoltage(ox );
+
+  float nh3_rs = RL * ((5.0 - nh3_v) / nh3_v);
+  float red_rs = RL * ((5.0 - red_v) / red_v);
+  float ox_rs  = RL * ((5.0 - ox_v ) / ox_v );
+
+  Serial.print("NH3: "); Serial.print(nh3_rs); Serial.println("Ω");
+  delay(10);
+  Serial.print("RED: "); Serial.print(red_rs); Serial.println("Ω");
+  delay(10);
+  Serial.print("OX : "); Serial.print(ox_rs);  Serial.println("Ω");
+  delay(10);
+}
+
+void Air6814::setBaseline(float nh3, float red, float ox)
+{
+  this->R0_NH3 = nh3;
+  this->R0_RED = red;
+  this->R0_OX  = ox;
 }

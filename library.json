@@ -1,6 +1,6 @@
 {
     "name": "Air6814",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Arduino/PlatformIO driver for the Freshtechc Air6814 sensor module.",
     "keywords": ["gas", "sensor", "MICS6814", "CO", "NO2", "NH3", "CH4", "air quality", "SHT30", "Temperature", "Humidity"],
     "authors": [
