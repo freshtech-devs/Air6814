@@ -3,10 +3,10 @@
 *
 *Permission is hereby granted, free of charge, to any person obtaining a copy
 *of this software and associated documentation files (the "Software"), to deal
-*in the Software without restriction, including without limitation the rights to
-*use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-*the Software, and to permit persons to whom the Software is furnished to do so,
-*subject to the following conditions:
+*in the Software without restriction, including without limitation the rights
+*to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+*copies of the Software, and to permit persons to whom the Software is
+*furnished to do so, subject to the following conditions:
 
 **The above copyright notice and this permission notice shall be included in all
 * copies or substantial portions of the Software.
@@ -18,9 +18,10 @@
 *THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 *IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 *FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-*AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-*WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-*CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+*LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+*OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
+*SOFTWARE.
 */
 
 #ifndef Air6814_H
@@ -32,6 +33,13 @@
 #define TH 0
 #define ALL 1
 #define RL 56000
+
+enum gasType
+{ 
+  NH3 = 0, 
+  RED = 1, 
+  OX  = 2 
+};
 
 class Air6814
 {
@@ -45,6 +53,7 @@ class Air6814
     {
       shtOnly = option;
       temp = 0.0; humidity = 0.0;
+      nh3_rs = 0.0; red_rs = 0.0; ox_rs = 0.0; 
       nh3 = 0.0; co = 0.0; ch4 = 0.0; no2 = 0.0;
     }
 
@@ -71,6 +80,13 @@ class Air6814
     /// @brief Set the baseline resistance for MiCS6814
     void setBaseline(float NH3, float RED, float OX);
 
+    /// @brief Return the resistance value of desired gas type
+    /// @param gasType NH3, RED or OX
+    /// @return resistance value
+    float getRS(gasType gasType);
+
+    void printRS(gasType gasType);
+
   private:
     float R0_NH3 = 99591.49;
     float R0_RED  = 99768.25;
@@ -80,6 +96,9 @@ class Air6814
 
     float temp;
     float humidity;
+    float nh3_rs;
+    float red_rs;
+    float ox_rs;
     float nh3;
     float co;
     float ch4;
@@ -114,10 +133,7 @@ class Air6814
     float computePPM(float rs, float r0, float A, float B);
 
     /// @brief Converts raw sensor readings to PPM
-    /// @param nh3 raw sensor reading from NH3 MOD
-    /// @param red raw sensor reading from RED MOD
-    /// @param ox raw sensor reading from OX MOD
-    void rawToPPM(float nh3, float red, float ox);
+    void rsToPPM();
 
     /// @brief Reads raw temperature and humidity sensor readings from SHT30
     /// @param sensor Air6814 Sensor object
@@ -125,4 +141,5 @@ class Air6814
     /// @return false : Sensor reading failed 
     bool sht30_read();
 };
+
 #endif

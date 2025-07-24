@@ -3,10 +3,10 @@
 *
 *Permission is hereby granted, free of charge, to any person obtaining a copy
 *of this software and associated documentation files (the "Software"), to deal
-*in the Software without restriction, including without limitation the rights to
-*use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-*the Software, and to permit persons to whom the Software is furnished to do so,
-*subject to the following conditions:
+*in the Software without restriction, including without limitation the rights
+*to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+*copies of the Software, and to permit persons to whom the Software is
+*furnished to do so, subject to the following conditions:
 
 **The above copyright notice and this permission notice shall be included in all
 * copies or substantial portions of the Software.
@@ -18,9 +18,10 @@
 *THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 *IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 *FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-*AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-*WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-*CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+*LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+*OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
+*SOFTWARE.
 */
 
 #include "Air6814.h"
@@ -91,23 +92,36 @@ float Air6814::computePPM(float rs, float r0, float A, float B)
   return pow(10, ((log10(ratio) - B) / A));
 }
 
-void Air6814::rawToPPM(float nh3_raw, float red_raw, float ox_raw)
+float Air6814::getRS(gasType gasType)
 {
-  float nh3_v = ads1115_toVoltage(nh3_raw);
-  float red_v = ads1115_toVoltage(red_raw);
-  float ox_v  = ads1115_toVoltage(ox_raw );
+  int16_t reading = 0;
+  float result = 0;
 
-  float nh3_rs = RL * ((5.0 - nh3_v) / nh3_v);
-  float red_rs = RL * ((5.0 - red_v) / red_v);
-  float ox_rs  = RL * ((5.0 - ox_v ) / ox_v );
+  ads1115_config(gasType); delay(100);
+  reading = ads1115_read();
+  result = RL * ((5.0 - ads1115_toVoltage(reading)) / ads1115_toVoltage(reading));
 
-  this->nh3 = computePPM(nh3_rs, R0_NH3, -0.48, -0.7309817977);
-  this->co  = computePPM(red_rs, R0_RED, -0.77, 0.4635861933);
-  this->ch4 = computePPM(red_rs, R0_RED, -0.40, 0.122109002);
-  this->no2 = computePPM(ox_rs,  R0_OX,  -1.20, -2.772829);
+  if (gasType == NH3)
+    this->nh3_rs = result;
+  else if (gasType == RED)
+    this->red_rs = result;
+  else if (gasType == OX)
+    this->ox_rs = result;
+  
+  return result;
 }
 
+void Air6814::rsToPPM()
+{
+  this->getRS(NH3);
+  this->getRS(RED);
+  this->getRS(OX);
 
+  this->nh3 = computePPM(this->nh3_rs, R0_NH3, -0.48, -0.7309817977);
+  this->co  = computePPM(this->red_rs, R0_RED, -0.77, 0.4635861933);
+  this->ch4 = computePPM(this->red_rs, R0_RED, -0.40, 0.122109002);
+  this->no2 = computePPM(this->ox_rs,  R0_OX,  -1.20, -2.772829);
+}
 
 bool Air6814::sht30_read()
 {
@@ -141,14 +155,30 @@ void Air6814::readAll(int option)
   
   if (option == ALL)
   {
-    ads1115_config(0); delay(100);
-    int16_t nh3 = ads1115_read();
-    ads1115_config(1); delay(100);
-    int16_t red = ads1115_read();
-    ads1115_config(2); delay(100); 
-    int16_t ox = ads1115_read();
+    this->getRS(NH3);
+    this->getRS(RED);
+    this->getRS(OX);
 
-    rawToPPM(nh3, red, ox);
+    rsToPPM();
+  }
+}
+
+void Air6814::printRS(gasType gasType)
+{
+  if (gasType == NH3)
+  {
+    Serial.print("NH3: "); Serial.print(this->nh3_rs); Serial.println("Ω");
+    delay(10);
+  }
+  else if (gasType == RED)
+  {
+  Serial.print("RED: "); Serial.print(this->red_rs); Serial.println("Ω");
+  delay(10);
+  }
+  else if (gasType == OX)
+  {
+    Serial.print("OX : "); Serial.print(this->ox_rs);  Serial.println("Ω");
+    delay(10);
   }
 }
 
@@ -175,27 +205,9 @@ const void Air6814::printData(int option)
 
 const void Air6814::printOhm()
 {
-  ads1115_config(0); delay(100);
-  int16_t nh3 = ads1115_read();
-  ads1115_config(1); delay(100);
-  int16_t red = ads1115_read();
-  ads1115_config(2); delay(100); 
-  int16_t ox = ads1115_read();
-
-  float nh3_v = ads1115_toVoltage(nh3);
-  float red_v = ads1115_toVoltage(red);
-  float ox_v  = ads1115_toVoltage(ox );
-
-  float nh3_rs = RL * ((5.0 - nh3_v) / nh3_v);
-  float red_rs = RL * ((5.0 - red_v) / red_v);
-  float ox_rs  = RL * ((5.0 - ox_v ) / ox_v );
-
-  Serial.print("NH3: "); Serial.print(nh3_rs); Serial.println("Ω");
-  delay(10);
-  Serial.print("RED: "); Serial.print(red_rs); Serial.println("Ω");
-  delay(10);
-  Serial.print("OX : "); Serial.print(ox_rs);  Serial.println("Ω");
-  delay(10);
+  printRS(NH3);
+  printRS(RED);
+  printRS(OX);
 }
 
 void Air6814::setBaseline(float nh3, float red, float ox)
