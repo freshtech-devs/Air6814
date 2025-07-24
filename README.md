@@ -1,6 +1,8 @@
 # Freshtech Air6814 Sensor Module Library
 
 This is the Freshtech Air6814 library allowing you to communicate with Air6814 over I2C.
+Due to company policy, publicly available version only supports AVR framework.
+Library for ZephyrOS is available via B2B purchasing
 
 <img src="images/Air6814.png">
 
@@ -27,7 +29,7 @@ Freshtech Air6814 is calibrated with following baseline Resistance:
 This calibration was done in clean air at Jeju, South Korea
 If you feel such calibration does not fit your environment, you can re-calibrate your sensor by:
 1. Pre-heating the sensor for at least 24 hours (48 hours is recommended)
-2. Take multiple resistance readings using `printOhm()` method at clean air
+2. Take multiple resistance readings using `getRS()` and `printOhm()` method at clean air
 3. Average out the data and calibrate it to acutal respective gas concentration
 4. Use the resistance value for new baseline using `setBaseline()` method. 
 
